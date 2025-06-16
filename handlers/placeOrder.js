@@ -43,21 +43,6 @@ exports.placeOrder = async (event) => {
 			};
 		}
 
-		// Place the order
-		// const putItemCommand = new PutItemCommand({
-		// 	TableName: tableName,
-		// 	Item: {
-		// 		id: { S: v4() },
-		// 		productId: { S: id },
-		// 		quantity: { N: quantity.toString() },
-		// 		email: { S: email },
-		// 		status: { S: 'PENDING' },
-		// 		createdAt: { S: new Date().toISOString() },
-		// 	},
-		// });
-
-		// await dynamoDBClient.send(putItemCommand);
-
 		// Send message to SQS queue
 		const orderId = v4();
 

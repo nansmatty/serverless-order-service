@@ -48,3 +48,13 @@ functions:
       - httpApi:
           path: /place-order
           method: post
+  processOrder:
+    handler: handlers/processOrder.processOrder
+    events:
+      - sqs:
+          arn:
+            # Why !Sub fails here:
+            # Serverless expects a string to call .split(':'), but !Sub returns an object during CloudFormation compile time.
+            # !Sub works for CloudFormation but not directly where Serverless itself needs to interpret the value before deploying.
+            Fn::GetAtt: [OrderQueue, Arn]
+          batchSize: 10 # Number of messages to process at a time
