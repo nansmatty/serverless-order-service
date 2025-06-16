@@ -80,7 +80,7 @@ exports.placeOrder = async (event) => {
 		});
 
 		// Send the order confirmation email to the user using AWS SES
-		await sendOrderEmail(email, orderId, product.productName || 'unknown product', quantity);
+		await sendOrderEmail(email, orderId, product.productName?.S || 'unknown product', quantity);
 
 		await sfnClient.send(startExecutionCommand);
 

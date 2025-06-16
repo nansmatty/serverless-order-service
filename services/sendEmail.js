@@ -4,7 +4,7 @@ const sesClient = new SESClient({ region: process.env.REGION });
 
 exports.sendOrderEmail = async (toEmail, orderId, productName, quantity) => {
 	const emailParams = {
-		Source: 'nodereactaws@gmail.com', // Replace with your verified SES email
+		Source: process.env.EMAIL_IDENTITY, // Replace with your verified SES email
 		Destination: {
 			ToAddresses: [toEmail],
 		},

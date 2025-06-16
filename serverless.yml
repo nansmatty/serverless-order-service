@@ -14,6 +14,7 @@ provider:
     ORDER_TABLE: !Ref OrdersTable
     REGION: ap-southeast-1
     ORDER_QUEUE_URL: !Sub https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/OrderQueue
+    EMAIL_IDENTITY: ${ssm:/EMAIL_IDENTITY} # Email identity for SES
   
   httpApi:
     authorizers:
@@ -32,12 +33,14 @@ provider:
         - sqs:ReceiveMessage
         - sqs:DeleteMessage
         - states:StartExecution
+        - ses:SendEmail
       Resource:
         # There is multiple ways we can ref the arn in serverless.yml.
         # 1. Using Fn::GetAtt: [OrdersTable, Arn]
         - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${OrdersTable}
         - !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:OrderQueue
         - !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:OrderProcessingStateMachine
+        - !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*
   
 resources:
   Resources:
