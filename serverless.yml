@@ -28,6 +28,8 @@ provider:
         - sqs:ReceiveMessage
         - sqs:DeleteMessage
       Resource:
+        # There is multiple ways we can ref the arn in serverless.yml.
+        # 1. Using Fn::GetAtt: [OrdersTable, Arn]
         - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${OrdersTable}
         - !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:OrderQueue
   

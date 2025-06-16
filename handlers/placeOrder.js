@@ -1,14 +1,11 @@
-const { DynamoDBClient, PutItemCommand } = require('@aws-sdk/client-dynamodb');
 const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
 const axios = require('axios');
 const { v4 } = require('uuid');
 
-const dynamoDBClient = new DynamoDBClient({ region: process.env.REGION });
 const sqsClient = new SQSClient({ region: process.env.REGION });
 
 exports.placeOrder = async (event) => {
 	try {
-		const tableName = process.env.ORDER_TABLE;
 		const orderQueueUrl = process.env.ORDER_QUEUE_URL;
 
 		const email = event.requestContext.authorizer.jwt.claims.email;
