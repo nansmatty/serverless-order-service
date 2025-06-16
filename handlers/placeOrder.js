@@ -11,8 +11,17 @@ exports.placeOrder = async (event) => {
 		const tableName = process.env.ORDER_TABLE;
 		const orderQueueUrl = process.env.ORDER_QUEUE_URL;
 
-		const { id, quantity, email } = JSON.parse(event.body);
-		if (!id || !quantity || !email) {
+		const email = event.requestContext.authorizer.jwt.claims.email;
+
+		if (!email) {
+			return {
+				statusCode: 401,
+				body: JSON.stringify({ error: 'Unauthorized!' }),
+			};
+		}
+
+		const { id, quantity } = JSON.parse(event.body);
+		if (!id || !quantity) {
 			return {
 				statusCode: 400,
 				body: JSON.stringify({ error: 'Missing required fields.' }),
