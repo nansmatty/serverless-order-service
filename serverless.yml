@@ -14,8 +14,8 @@ provider:
     - Effect: Allow
       Action:
         - dynamodb:PutItem
-        - dynamodb:GetItem
-        - dynamodb:Scan
+        # - dynamodb:GetItem
+        # - dynamodb:Scan
       Resource:
         - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${OrdersTable}
   
@@ -34,9 +34,9 @@ resources:
             KeyType: HASH
 
 functions:
-  hello:
-    handler: handler.hello
+  placeOrder:
+    handler: handlers/placeOrder.placeOrder
     events:
       - httpApi:
-          path: /
-          method: get
+          path: /place-order
+          method: post
