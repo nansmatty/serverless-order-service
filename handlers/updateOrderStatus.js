@@ -4,6 +4,8 @@ const dynamoDBClient = new DynamoDBClient({ region: process.env.REGION });
 
 exports.updateOrderStatus = async (event) => {
 	try {
+		console.log('Event received:', event);
+
 		const { id } = event;
 
 		await dynamoDBClient.send(

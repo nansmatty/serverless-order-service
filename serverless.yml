@@ -27,14 +27,17 @@ provider:
     - Effect: Allow
       Action:
         - dynamodb:PutItem
+        - dynamodb:UpdateItem
         - sqs:SendMessage
         - sqs:ReceiveMessage
         - sqs:DeleteMessage
+        - states:StartExecution
       Resource:
         # There is multiple ways we can ref the arn in serverless.yml.
         # 1. Using Fn::GetAtt: [OrdersTable, Arn]
         - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${OrdersTable}
         - !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:OrderQueue
+        - !Sub arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:OrderProcessingStateMachine
   
 resources:
   Resources:

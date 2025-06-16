@@ -1,8 +1,10 @@
 const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
+const { SFNClient, StartExecutionCommand } = require('@aws-sdk/client-sfn');
 const axios = require('axios');
 const { v4 } = require('uuid');
 
 const sqsClient = new SQSClient({ region: process.env.REGION });
+const sfnClient = new SFNClient({ region: process.env.REGION });
 
 exports.placeOrder = async (event) => {
 	try {
@@ -69,6 +71,14 @@ exports.placeOrder = async (event) => {
 		});
 
 		await sqsClient.send(sendMessageCommand);
+
+		// This will tell AWS to start running the Step Function(state machine) using the order payload
+		const startExecutionCommand = new StartExecutionCommand({
+			stateMachineArn: process.env.STEP_FUNCTION_ARN,
+			input: JSON.stringify({ ...payload }),
+		});
+
+		await sfnClient.send(startExecutionCommand);
 
 		return {
 			statusCode: 201,
