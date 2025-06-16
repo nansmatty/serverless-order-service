@@ -2,6 +2,7 @@ const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
 const { SFNClient, StartExecutionCommand } = require('@aws-sdk/client-sfn');
 const axios = require('axios');
 const { v4 } = require('uuid');
+const { sendOrderEmail } = require('../services/sendEmail');
 
 const sqsClient = new SQSClient({ region: process.env.REGION });
 const sfnClient = new SFNClient({ region: process.env.REGION });
@@ -77,6 +78,9 @@ exports.placeOrder = async (event) => {
 			stateMachineArn: process.env.STEP_FUNCTION_ARN,
 			input: JSON.stringify({ ...payload }),
 		});
+
+		// Send the order confirmation email to the user using AWS SES
+		await sendOrderEmail(email, orderId, product.productName || 'unknown product', quantity);
 
 		await sfnClient.send(startExecutionCommand);
 
