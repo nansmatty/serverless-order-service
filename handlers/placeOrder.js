@@ -76,11 +76,11 @@ exports.placeOrder = async (event) => {
 		// This will tell AWS to start running the Step Function(state machine) using the order payload
 		const startExecutionCommand = new StartExecutionCommand({
 			stateMachineArn: process.env.STEP_FUNCTION_ARN,
-			input: JSON.stringify({ ...payload }),
+			input: JSON.stringify({ ...payload, product }),
 		});
 
 		// Send the order confirmation email to the user using AWS SES
-		await sendOrderEmail(email, orderId, product.productName?.S || 'unknown product', quantity);
+		await sendOrderEmail(email, orderId, product.productName?.S || 'unknown product', quantity, 'We will notify you once your order is shipped.');
 
 		await sfnClient.send(startExecutionCommand);
 

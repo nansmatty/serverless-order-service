@@ -6,7 +6,7 @@ exports.updateOrderStatus = async (event) => {
 	try {
 		console.log('Event received:', event);
 
-		const { id } = event;
+		const { id, email, quantity, product } = event;
 
 		await dynamoDBClient.send(
 			new UpdateItemCommand({
@@ -19,10 +19,13 @@ exports.updateOrderStatus = async (event) => {
 					'#status': 'status',
 				},
 				ExpressionAttributeValues: {
-					':newStatus': { S: 'PROCESSING' },
+					':newStatus': { S: 'SHIPPING' },
 				},
 			})
 		);
+
+		// Send the order confirmation email to the user using AWS SES
+		await sendOrderEmail(email, id, product.productName?.S || 'unknown product', quantity, 'Your order is shipped now.');
 
 		return {
 			statusCode: 200,

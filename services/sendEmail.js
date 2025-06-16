@@ -2,7 +2,7 @@ const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
 
 const sesClient = new SESClient({ region: process.env.REGION });
 
-exports.sendOrderEmail = async (toEmail, orderId, productName, quantity) => {
+exports.sendOrderEmail = async (toEmail, orderId, productName, quantity, content) => {
 	const emailParams = {
 		Source: process.env.EMAIL_IDENTITY, // Replace with your verified SES email
 		Destination: {
@@ -14,7 +14,7 @@ exports.sendOrderEmail = async (toEmail, orderId, productName, quantity) => {
 			},
 			Body: {
 				Text: {
-					Data: `Thank you for your order! Your order ID is ${orderId}. You ordered ${quantity} ${productName}. We will process it shortly.\n We will notify you once your order is shipped.`,
+					Data: `Thank you for your order! Your order ID is ${orderId}. You ordered ${quantity} ${productName}.\n We will process it shortly.\n ${content}`,
 				},
 			},
 		},
