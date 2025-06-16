@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.828.0",
+    "@aws-sdk/client-sqs": "^3.828.0",
+    "axios": "^1.10.0",
     "uuid": "^11.1.0"
   }
 }

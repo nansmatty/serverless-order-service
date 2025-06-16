@@ -1,12 +1,15 @@
 const { DynamoDBClient, PutItemCommand } = require('@aws-sdk/client-dynamodb');
+const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
 const axios = require('axios');
 const { v4 } = require('uuid');
 
 const dynamoDBClient = new DynamoDBClient({ region: process.env.REGION });
+const sqsClient = new SQSClient({ region: process.env.REGION });
 
 exports.placeOrder = async (event) => {
 	try {
 		const tableName = process.env.ORDER_TABLE;
+		const orderQueueUrl = process.env.ORDER_QUEUE_URL;
 
 		const { id, quantity, email } = JSON.parse(event.body);
 		if (!id || !quantity || !email) {
@@ -41,19 +44,40 @@ exports.placeOrder = async (event) => {
 		}
 
 		// Place the order
-		const putItemCommand = new PutItemCommand({
-			TableName: tableName,
-			Item: {
-				id: { S: v4() },
-				productId: { S: id },
-				quantity: { N: quantity.toString() },
-				email: { S: email },
-				status: { S: 'PENDING' },
-				createdAt: { S: new Date().toISOString() },
-			},
+		// const putItemCommand = new PutItemCommand({
+		// 	TableName: tableName,
+		// 	Item: {
+		// 		id: { S: v4() },
+		// 		productId: { S: id },
+		// 		quantity: { N: quantity.toString() },
+		// 		email: { S: email },
+		// 		status: { S: 'PENDING' },
+		// 		createdAt: { S: new Date().toISOString() },
+		// 	},
+		// });
+
+		// await dynamoDBClient.send(putItemCommand);
+
+		// Send message to SQS queue
+		const orderId = v4();
+
+		// Create the order payload
+		const payload = {
+			id: orderId,
+			productId: id,
+			quantity,
+			email,
+			status: 'PENDING',
+			createdAt: new Date().toISOString(),
+		};
+
+		// Send the order to SQS
+		const sendMessageCommand = new SendMessageCommand({
+			QueueUrl: orderQueueUrl,
+			MessageBody: JSON.stringify(payload),
 		});
 
-		await dynamoDBClient.send(putItemCommand);
+		await sqsClient.send(sendMessageCommand);
 
 		return {
 			statusCode: 201,
