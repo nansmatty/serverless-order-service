@@ -3,6 +3,9 @@ org: practicetest123
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: orderService
 
+plugins:
+  - serverless-step-functions
+
 provider:
   name: aws
   runtime: nodejs22.x
@@ -55,6 +58,8 @@ resources:
 functions:
   placeOrder:
     handler: handlers/placeOrder.placeOrder
+    environment:
+      STEP_FUNCTION_ARN: !Ref OrderProcessingStateMachine # Reference the state machine ARN
     events:
       - httpApi:
           path: /place-order
@@ -71,3 +76,25 @@ functions:
             # !Sub works for CloudFormation but not directly where Serverless itself needs to interpret the value before deploying.
             Fn::GetAtt: [OrderQueue, Arn]
           batchSize: 10 # Number of messages to process at a time
+  
+  updateOrderStatus:
+    handler: handlers/updateOrderStatus.updateOrderStatus
+
+stepFunctions: #Start defining the step functions
+  stateMachines: #Define list of state machines
+    OrderProcessingStateMachine: # Name of the state machine\
+      name: OrderProcessingStateMachine #Aws name of the state machine
+      definition: # The actual structure (state transitions) of the step function
+        Comment: "Order processing with status update" # Just a comment to describe the state machine
+        StartAt: UpdateStatusToProcessing # The first state to start with
+        States:
+          UpdateStatusToProcessing:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [updateOrderStatus, Arn] # Get the ARN of the Lambda function
+            Next: NotifyUser # Transition to the next state
+          NotifyUser:
+            Type: Pass #This is dummy state to pass-through the step
+            Result: "User notified about order processing"
+            End: true # This is the end of the state machine
+          
